@@ -160,6 +160,46 @@ class OneClickSongGenerationConfig(SongGenerationConfig):
             " instrumentals and backup vocals by."
         ),
     )
+    separation_model: DropdownConfig = DropdownConfig(
+        label="Separation model",
+        info="The model to use for audio separation.",
+        value=SeparationModel.BS_ROFORMER_VIPERX_1297,
+        choices=list(SeparationModel),
+    )
+    separation_model_main_backup: DropdownConfig = DropdownConfig(
+        label="Separation model (main/backup)",
+        info=(
+            "The model to use for separating main and backup vocals (if"
+            " present)."
+        ),
+        value=SeparationModel.MEL_ROFORMER_KARAOKE_AUFR33_VIPERX,
+        choices=list(SeparationModel),
+    )
+    separation_model_dereverb: DropdownConfig = DropdownConfig(
+        label="Separation model (de-reverb)",
+        info=(
+            "The model to use for de-reverbing main vocals."
+        ),
+        value=SeparationModel.DEVERB_BS_ROFORMER_ANVUEW,
+        choices=list(SeparationModel),
+    )
+    separation_segment_size: RadioConfig = RadioConfig(
+        label="Separation segment size",
+        info=(
+            "The size of the segments into which the audio is split for"
+            " separation. Larger values may improve results but use more resources."
+        ),
+        value=SegmentSize.SEG_512,
+        choices=list(SegmentSize),
+    )
+    dereverb_segment_size: RadioConfig = RadioConfig(
+        label="De-reverb segment size",
+        info=(
+            "The size of the segments used for the de-reverb separation."
+        ),
+        value=SegmentSize.SEG_256,
+        choices=list(SegmentSize),
+    )
     show_intermediate_audio: CheckboxConfig = CheckboxConfig(
         label="Show intermediate audio",
         info="Show intermediate audio tracks produced during song cover generation.",
@@ -318,7 +358,7 @@ class MultiStepSongGenerationConfig(SongGenerationConfig):
     separation_model: DropdownConfig = DropdownConfig(
         label="Separation model",
         info="The model to use for audio separation.",
-        value=SeparationModel.UVR_MDX_NET_VOC_FT,
+        value=SeparationModel.BS_ROFORMER_VIPERX_1297,
         choices=list(SeparationModel),
     )
     segment_size: RadioConfig = RadioConfig(

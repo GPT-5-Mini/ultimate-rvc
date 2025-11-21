@@ -133,7 +133,7 @@ def _get_audio_separator(
             "hop_length": 1024,
             "segment_size": segment_size,
             "overlap": 0.25,
-            "batch_size": 1,
+            "batch_size": 4,
             "enable_denoise": True,
         },
     )
@@ -933,6 +933,15 @@ def run_pipeline(
     output_sr: int = 44100,
     output_format: AudioExt = AudioExt.MP3,
     output_name: str | None = None,
+    separation_model_vocals: SeparationModel = SeparationModel.BS_ROFORMER_VIPERX_1297,
+    separation_model_main_backup: SeparationModel = (
+        SeparationModel.MEL_ROFORMER_KARAOKE_AUFR33_VIPERX
+    ),
+    separation_model_dereverb: SeparationModel = (
+        SeparationModel.DEVERB_BS_ROFORMER_ANVUEW
+    ),
+    separation_segment_size: SegmentSize = SegmentSize.SEG_512,
+    dereverb_segment_size: SegmentSize = SegmentSize.SEG_256,
     cookiefile: StrPath | None = None,
     progress_bar: gr.Progress | None = None,
 ) -> tuple[Path, ...]:
@@ -1008,6 +1017,17 @@ def run_pipeline(
         The audio format of the song cover.
     output_name : str, optional
         The name of the song cover.
+    separation_model_vocals : SeparationModel, default=SeparationModel.UVR_MDX_NET_VOC_FT
+        The model to use for separating vocals from instrumentals in the
+        initial separation step.
+    separation_model_main_backup : SeparationModel, default=SeparationModel.UVR_MDX_NET_KARA_2
+        The model to use for separating main and backup vocals.
+    separation_model_dereverb : SeparationModel, default=SeparationModel.REVERB_HQ_BY_FOXJOY
+        The model to use for de-reverbing the main vocals.
+    separation_segment_size : SegmentSize, default=SegmentSize.SEG_512
+        Segment size to use for the initial and main/backups separation.
+    dereverb_segment_size : SegmentSize, default=SegmentSize.SEG_256
+        Segment size to use for de-reverb separation.
     cookiefile : StrPath, optional
         The path to a file containing cookies to use when downloading
         audio from Youtube.
@@ -1030,26 +1050,30 @@ def run_pipeline(
     vocals_track, instrumentals_track = separate_audio(
         song,
         song_dir,
-        SeparationModel.UVR_MDX_NET_VOC_FT,
-        SegmentSize.SEG_512,
+        separation_model_vocals,
+        separation_segment_size,
     )
     display_progress(
         "[~] Separating main vocals from backup vocals...",
         2 / 9,
         progress_bar,
     )
-    backup_vocals_track, main_vocals_track = separate_audio(
+    # The underlying separator returns the primary stem first, followed by
+    # the secondary stem. For the main/backups separation we want the
+    # primary stem to be the main vocals (which we'll convert) and the
+    # secondary stem to be the backing vocals, so assign accordingly.
+    main_vocals_track, backup_vocals_track = separate_audio(
         vocals_track,
         song_dir,
-        SeparationModel.UVR_MDX_NET_KARA_2,
-        SegmentSize.SEG_512,
+        separation_model_main_backup,
+        separation_segment_size,
     )
     display_progress("[~] De-reverbing vocals...", 3 / 9, progress_bar)
-    reverb_track, vocals_dereverb_track = separate_audio(
+    vocals_dereverb_track, reverb_track = separate_audio(
         main_vocals_track,
         song_dir,
-        SeparationModel.REVERB_HQ_BY_FOXJOY,
-        SegmentSize.SEG_256,
+        separation_model_dereverb,
+        dereverb_segment_size,
     )
     display_progress("[~] Converting vocals...", 4 / 9, progress_bar)
     converted_vocals_track = convert(

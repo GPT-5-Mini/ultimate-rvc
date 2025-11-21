@@ -53,6 +53,7 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
         _render_input(tab_config)
         with gr.Accordion("Options", open=False):
             _render_main_options(tab_config)
+            _render_separation_options(tab_config)
             _render_conversion_options(tab_config)
             _render_mixing_options(tab_config)
             _render_output_options(tab_config)
@@ -73,7 +74,6 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
                     run_pipeline,
                     info_msg="Song cover generated successfully!",
                 ),
-                cookiefile=cookiefile,
                 progress_bar=PROGRESS_BAR,
             ),
             inputs=[
@@ -104,6 +104,11 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
                 tab_config.output_sr.instance,
                 tab_config.output_format.instance,
                 tab_config.output_name.instance,
+                tab_config.separation_model.instance,
+                tab_config.separation_model_main_backup.instance,
+                tab_config.separation_model_dereverb.instance,
+                tab_config.separation_segment_size.instance,
+                tab_config.dereverb_segment_size.instance,
             ],
             outputs=[song_cover, *tab_config.intermediate_audio.all],
             concurrency_limit=1,
@@ -148,6 +153,11 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
                 tab_config.output_sr.value,
                 tab_config.output_format.value,
                 tab_config.show_intermediate_audio.value,
+                tab_config.separation_model.value,
+                tab_config.separation_model_main_backup.value,
+                tab_config.separation_model_dereverb.value,
+                tab_config.separation_segment_size.value,
+                tab_config.dereverb_segment_size.value,
             ],
             outputs=[
                 tab_config.n_octaves.instance,
@@ -174,6 +184,11 @@ def render(total_config: TotalConfig, cookiefile: str | None = None) -> None:
                 tab_config.output_sr.instance,
                 tab_config.output_format.instance,
                 tab_config.show_intermediate_audio.instance,
+                tab_config.separation_model.instance,
+                tab_config.separation_model_main_backup.instance,
+                tab_config.separation_model_dereverb.instance,
+                tab_config.separation_segment_size.instance,
+                tab_config.dereverb_segment_size.instance,
             ],
             show_progress="hidden",
         )
@@ -224,6 +239,18 @@ def _render_main_options(tab_config: OneClickSongGenerationConfig) -> None:
     with gr.Row():
         tab_config.n_octaves.instantiate()
         tab_config.n_semitones.instantiate()
+
+
+def _render_separation_options(tab_config: OneClickSongGenerationConfig) -> None:
+    with gr.Accordion("Audio separation", open=False):
+        gr.Markdown("")
+        with gr.Row():
+            tab_config.separation_model.instantiate()
+            tab_config.separation_model_main_backup.instantiate()
+            tab_config.separation_model_dereverb.instantiate()
+        with gr.Row():
+            tab_config.separation_segment_size.instantiate()
+            tab_config.dereverb_segment_size.instantiate()
 
 
 def _render_conversion_options(tab_config: OneClickSongGenerationConfig) -> None:

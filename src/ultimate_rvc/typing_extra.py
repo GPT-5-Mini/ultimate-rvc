@@ -17,6 +17,15 @@ class SeparationModel(StrEnum):
     UVR_MDX_NET_VOC_FT = "UVR-MDX-NET-Voc_FT.onnx"
     UVR_MDX_NET_KARA_2 = "UVR_MDXNET_KARA_2.onnx"
     REVERB_HQ_BY_FOXJOY = "Reverb_HQ_By_FoxJoy.onnx"
+    BS_ROFORMER_VIPERX_1297 = "model_bs_roformer_ep_317_sdr_12.9755.ckpt"
+    MEL_ROFORMER_VIPERX_1143 = "model_mel_band_roformer_ep_3005_sdr_11.4360.ckpt"
+    MEL_ROFORMER_KARAOKE_AUFR33_VIPERX = "mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956.ckpt"
+    # Use the 384-dim variant which is the version returned by the
+    # python-audio-separator models.json (matches how UVR5-UI maps
+    # BS-Roformer De-Reverb). The 256-dim variant appears only in
+    # a different source list and is not always available via the
+    # audio_separator library.
+    DEVERB_BS_ROFORMER_ANVUEW = "deverb_bs_roformer_8_384dim_10depth.ckpt"
 
 
 class SegmentSize(IntEnum):

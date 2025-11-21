@@ -24,6 +24,7 @@ from ultimate_rvc.cli.common import (
 from ultimate_rvc.cli.typing_extra import PanelName
 from ultimate_rvc.core.generate.song_cover import run_pipeline as _run_pipeline
 from ultimate_rvc.typing_extra import AudioExt, EmbedderModel, F0Method
+from ultimate_rvc.typing_extra import SegmentSize, SeparationModel
 
 app = typer.Typer(
     name="song-cover",
@@ -313,6 +314,54 @@ def run_pipeline(
             help="The name of the song cover.",
         ),
     ] = None,
+    separation_model_vocals: Annotated[
+        SeparationModel,
+        typer.Option(
+            case_sensitive=False,
+            rich_help_panel=PanelName.VOCAL_ENRICHMENT_OPTIONS,
+            help="The model to use for separating vocals from instrumentals.",
+        ),
+    ] = SeparationModel.BS_ROFORMER_VIPERX_1297,
+    separation_model_main_backup: Annotated[
+        SeparationModel,
+        typer.Option(
+            case_sensitive=False,
+            rich_help_panel=PanelName.VOCAL_ENRICHMENT_OPTIONS,
+            help=(
+                "The model to use for separating main and backup vocals."
+            ),
+        ),
+    ] = SeparationModel.MEL_ROFORMER_KARAOKE_AUFR33_VIPERX,
+    separation_model_dereverb: Annotated[
+        SeparationModel,
+        typer.Option(
+            case_sensitive=False,
+            rich_help_panel=PanelName.VOCAL_POST_PROCESSING_OPTIONS,
+            help=(
+                "The model to use for de-reverbing main vocals."
+            ),
+        ),
+    ] = SeparationModel.DEVERB_BS_ROFORMER_ANVUEW,
+    separation_segment_size: Annotated[
+        SegmentSize,
+        typer.Option(
+            case_sensitive=False,
+            rich_help_panel=PanelName.VOCAL_ENRICHMENT_OPTIONS,
+            help=(
+                "The segment size for the initial vocal/instrumental separation."
+            ),
+        ),
+    ] = SegmentSize.SEG_512,
+    dereverb_segment_size: Annotated[
+        SegmentSize,
+        typer.Option(
+            case_sensitive=False,
+            rich_help_panel=PanelName.VOCAL_POST_PROCESSING_OPTIONS,
+            help=(
+                "The segment size for the de-reverb separation."
+            ),
+        ),
+    ] = SegmentSize.SEG_256,
     cookiefile: Annotated[
         Path | None,
         typer.Option(
@@ -361,6 +410,11 @@ def run_pipeline(
         output_sr=output_sr,
         output_format=output_format,
         output_name=output_name,
+        separation_model_vocals=separation_model_vocals,
+        separation_model_main_backup=separation_model_main_backup,
+        separation_model_dereverb=separation_model_dereverb,
+        separation_segment_size=separation_segment_size,
+        dereverb_segment_size=dereverb_segment_size,
         cookiefile=cookiefile,
         progress_bar=None,
     )
